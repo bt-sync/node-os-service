@@ -215,6 +215,24 @@ NAN_METHOD(Add) {
 		return;
 	}
 
+	// set restart after failure
+	SC_ACTION actions[3];
+	actions[0].Type = SC_ACTION_RESTART;
+	actions[0].Delay = FAILURE_ACTION_DELAY * 1000;
+	actions[1].Type = SC_ACTION_RESTART;
+	actions[1].Delay = FAILURE_ACTION_DELAY * 1000;
+	actions[2].Type = SC_ACTION_RESTART;
+	actions[2].Delay = FAILURE_ACTION_DELAY * 1000;
+
+	SERVICE_FAILURE_ACTIONS svcFailureActions;
+	svcFailureActions.dwResetPeriod = FAILURE_RESET_TIME;
+	svcFailureActions.lpRebootMsg = NULL;
+	svcFailureActions.lpCommand = NULL;
+	svcFailureActions.cActions = 3;
+	svcFailureActions.lpsaActions = actions;
+	ChangeServiceConfig2(svc_handle, SERVICE_CONFIG_FAILURE_ACTIONS, &svcFailureActions);
+
+
 	CloseServiceHandle (svc_handle);
 	CloseServiceHandle (scm_handle);
 
