@@ -228,7 +228,7 @@ NAN_METHOD(Add) {
 	svcFailureActions.dwResetPeriod = FAILURE_RESET_TIME;
 	svcFailureActions.lpRebootMsg = NULL;
 	svcFailureActions.lpCommand = NULL;
-	svcFailureActions.cActions = lenof(actions);
+	svcFailureActions.cActions = 3;
 	svcFailureActions.lpsaActions = actions;
 	ChangeServiceConfig2(svc_handle, SERVICE_CONFIG_FAILURE_ACTIONS, &svcFailureActions);
 
