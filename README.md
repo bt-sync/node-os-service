@@ -23,10 +23,9 @@ A program can then be added, removed and run as a service:
     
     service.remove ("my-service");
     
-    var logStream = fs.createWriteStream ("my-service.log");
-    
-    service.run (logStream, function () {
-        console.log ("stop request received");
+    service.run (function () {
+        // Stop request received (i.e. a kill signal on Linux or from the
+        // Service Control Manager on Windows), so let's stop!
         service.stop ();
     });
 
@@ -57,9 +56,7 @@ with a `--add` parameter, and removes the created service when called with a
               console.trace(error);
         });
     } else if (process.argv[2] == "--run") {
-        var logStream = fs.createWriteStream (process.argv[1] + ".log");
-        
-        service.run (logStream, function () {
+        service.run (function () {
             service.stop (0);
         });
         
@@ -127,9 +124,7 @@ program adding the services.
 Each of the service programs can simply start themselves as services using the
 following code:
 
-    var logStream = fs.createWriteStream (process.argv[1] + ".log");
-    
-    service.run (logStream, function () {
+    service.run (function () {
         service.stop (0);
     });
     
@@ -266,30 +261,27 @@ The following example removes the service named `my-service`:
             console.trace(error);
     });
 
-## service.run (stdoutLogStream, [stderrLogStream,] callback)
+## service.run (callback)
 
 The `run()` function will attempt to run the program as a service.
 
-The programs `process.stdout` stream will be replaced with the
-`stdoutLogStream` parameter, and the programs `process.stderr` stream
-replaced with the `stdoutLogStream` parameter (this allows the redirection of
-all `console.log()` type calls to a service specific log file).  If the
-`stderrLogStream` parameter is not specified the programs `process.stderr`
-stream will be replaced with the `stdoutLogStream` parameter.  The `callback`
-function will be called when the service receives a stop request, e.g. because
-the Windows Service Controller was used to send a stop request to the service,
-or a `SIGTERM` signal was received.
+**NOTE** When run the service will NOT make any changes to the `process.stdout`
+and `process.stderr` streams.  Users are required to utilise whatever logging
+modules they require to managing process logging and its destination.  Older
+versions of this module (versions before 2.0.0) would support re-directing
+these streams to a specific writeable stream, support for that was removed in
+version 2.0.0.
+
+The `callback` function will be called when the service receives a stop request,
+e.g. because the Windows Service Controller was used to send a stop request to
+the service, or a `SIGTERM` signal was received.
 
 The program should perform cleanup tasks and then call the `service.stop()`
 function.
 
-The following example starts a program as a service, it uses the same log
-stream for standard output and standard error:
-
-    var logStream = fs.createWriteStream ("my-service.log");
+The following example starts a program as a service:
     
-    service.run (logStream, function () {
-        console.log ("stop request received");
+    service.run (function () {
         service.stop ();
     });
 
@@ -308,22 +300,13 @@ finished performing cleanup tasks.
 The following example stops the calling program specifying a return code of
 `0`, the function will not return:
 
-    var logStream = fs.createWriteStream ("my-service.log");
-
-    service.run (logStream, function () {
-        console.log ("stop request received");
+    service.run (function () {
         service.stop (0);
     });
 
 # Example Programs
 
 Example programs are included under the modules `example` directory.
-
-# Bugs & Known Issues
-
-None, yet!
-
-Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 # Changes
 
@@ -386,13 +369,29 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    `__defineGetter__()` function
  * Specify dependancies when adding a service
 
-# Roadmap
+## Version 2.0.0 - 12/02/2018
 
-Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
+ * Remove support to override stdout/stderr with a logstream (let users use
+   their required/own logging modules) - the run() function now only accepts
+   one argument whereas previously this was either two or three
+
+## Version 2.1.0 - 02/05/2018
+
+ * Support Node.js 10
+
+## Version 2.1.2 - 06/06/2018
+
+ * Set NoSpaceships Ltd to be the owner and maintainer
+
+## Version 2.1.3 - 07/06/2018
+
+ * Remove redundant sections from README.md
 
 # License
 
-Copyright (c) 2014 Stephen Vickers
+Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
+
+Copyright (c) 2014 Stephen Vickers <stephen.vickers.sv@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -411,7 +410,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-# Author
-
-Stephen Vickers <stephen.vickers.sv@gmail.com>
