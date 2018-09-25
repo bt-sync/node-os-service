@@ -38,16 +38,15 @@ if (process.argv[2] == "--add" && process.argv.length >= 4) {
 			console.log(error.toString());
 	});
 } else if (process.argv[2] == "--run") {
+	var logStream = fs.createWriteStream (process.argv[1] + ".log");
 	service.run (logStream, function () {
 		service.stop (0);
 	});
 
-	var logStream = fs.createWriteStream(process.argv[1] + ".log");
-
 	// Here is our long running code, simply print a date/time string to
 	// our log file
 	setInterval (function () {
-		logStream.write(new Date ().toString () + "\n");
+		console.log(new Date ().toString ());
 	}, 1000);
 } else {
 	usage ();

@@ -430,8 +430,16 @@ function remove (name, cb) {
 	}
 }
 
-function run (stopCallback) {
+function run (stdoutLogStream, stderrLogStream, stopCallback) {
+	if (! stopCallback) {
+		stopCallback = stderrLogStream;
+		stderrLogStream = stdoutLogStream;
+	}
+
 	if (! runInitialised) {
+		process.stdout.write = stdoutLogStream.write.bind(stdoutLogStream);
+		process.stderr.write = stderrLogStream.write.bind(stderrLogStream);
+		
 		if (os.platform() == "win32") {
 			setInterval (function () {
 				if (isStopRequested ()) {
