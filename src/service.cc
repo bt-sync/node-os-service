@@ -111,27 +111,18 @@ DWORD __stdcall run_thread (LPVOID param) {
 
 namespace service {
 
-void InitAll (Handle<Object> exports) {
+void InitAll (v8::Local<v8::Object> exports) {
 	pthread_mutex_init(&status_handle_mtx, NULL);
 	pthread_mutex_init(&stop_requested_mtx, NULL);
 	pthread_mutex_init(&stop_service_mtx, NULL);
 	
 	pthread_cond_init(&stop_service, NULL);
 
-	exports->Set(Nan::New("add").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Add)).ToLocalChecked());
-
-	exports->Set(Nan::New("isStopRequested").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(IsStopRequested)).ToLocalChecked());
-	
-	exports->Set(Nan::New("remove").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Remove)).ToLocalChecked());
-	
-	exports->Set(Nan::New("run").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Run)).ToLocalChecked());
-	
-	exports->Set(Nan::New("stop").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Stop)).ToLocalChecked());
+	Nan::SetMethod(exports, "add", Add);
+	Nan::SetMethod(exports, "isStopRequested", IsStopRequested);
+	Nan::SetMethod(exports, "remove", Remove);
+	Nan::SetMethod(exports, "run", Run);
+	Nan::SetMethod(exports, "stop", Stop);
 }
 
 NODE_MODULE(service, InitAll)
